@@ -17,11 +17,12 @@ func main() {
 		panic(err)
 	}
 
-	/* Como não recebemos erro e sim um template válido, criamos uma variável do tipo struct anônimo chamada 'data', com um campo 'Name'. Logo após, instânciamos 'data', setando o valor de 'Name' com o valor 'Rafael Marques'.
+	/* Como não recebemos erro e sim um template válido, criamos uma variável do tipo struct anônimo chamada 'data', com um campo 'Name'. Logo após, instânciamos 'data', setando o valor de 'Name' com o valor 'Rafael Marques' e 'Maker' e 'Model' de 'Car'.
 	 */
 	data := struct {
 		Name string
-	}{"Rafael Marques"}
+		Car  map[string]string
+	}{Name: "Rafael Marques", Car: map[string]string{"Maker": "Renault", "Model": "Kwid"}}
 
 	/* Finalmente, executamos o template, passando dois argumentos:
 	1 - onde queremos escrever a saída do template('Stdout' é a janela do terminal, função fornecida pelo pacote 'os');
