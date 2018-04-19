@@ -1,35 +1,52 @@
 package main
 
 import (
-	"html/template"
-	"os"
+	"fmt"
+	"github.com/RafaMarquesLearn/webgo/models"
+	_ "github.com/lib/pq"
+)
+
+const (
+	host     = "localhost"
+	port     = 5432
+	user     = "rafael"
+	password = "a0p1r0f3"
+	dbname   = "webgo"
 )
 
 func main() {
-	/* 'ParseFiles' vai abrir e tentar validar o arquivo template.
-	Se estiver ok, recebemos um objeto *Template e um erro 'nil'.
-	Caso contrário, recebemos um template vazio e um erro.
-	*/
-	t, err := template.ParseFiles("hello.gohtml")
-
-	/* Checamos se recebemos um erro e encerramos a aplicação.*/
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
+	us, err := models.NewUserService(psqlInfo)
 	if err != nil {
 		panic(err)
 	}
+	defer us.Close()
 
-	/* Como não recebemos erro e sim um template válido, criamos uma variável do tipo struct anônimo chamada 'data', com um campo 'Name'. Logo após, instânciamos 'data', setando o valor de 'Name' com o valor 'Rafael Marques' e 'Maker' e 'Model' de 'Car'.
-	 */
-	data := struct {
-		Name string
-		Car  map[string]string
-	}{Name: "Rafael Marques", Car: map[string]string{"Maker": "Renault", "Model": "Kwid"}}
+	// This will reset the database on every run, but is fine
+	// for testing things out.
+	us.DestructiveReset()
 
-	/* Finalmente, executamos o template, passando dois argumentos:
-	1 - onde queremos escrever a saída do template('Stdout' é a janela do terminal, função fornecida pelo pacote 'os');
-	2 - os dados que devem ser passados quando executarmos o template;
-	*/
-	err = t.Execute(os.Stdout, data)
+	user := models.User{
+		Name:     "Michael Scott",
+		Email:    "michael@dundermifflin.com",
+		Password: "bestboss",
+	}
+	err = us.Create(&user)
 	if err != nil {
 		panic(err)
 	}
+	// Verify that the user has a Remember and RememberHash
+	fmt.Printf("%+v\n", user)
+	if user.Remember == "" {
+		panic("Invalid remember token")
+	}
+	// Now verify that we can lookup a user with that remember
+	// token
+	user2, err := us.ByRemember(user.Remember)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%+v\n", *user2)
 }
