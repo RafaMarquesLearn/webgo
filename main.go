@@ -13,7 +13,7 @@ const (
 	host     = "localhost"
 	port     = 5432
 	user     = "rafael"
-	password = "a0p1r0f3"
+	password = "teste"
 	dbname   = "webgo"
 )
 
